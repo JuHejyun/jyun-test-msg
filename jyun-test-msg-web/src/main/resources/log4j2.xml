@@ -151,8 +151,8 @@
         <!-- 配置日志的根节点 -->
         <!-- 定义logger，只有定义了logger并引入了appender，appender才会生效 -->
         <asyncRoot level="info" includeLocation="true">
-            <!--<appender-ref ref="console_out_appender" />-->
-            <!--<appender-ref ref="console_err_appender" />-->
+            <appender-ref ref="console_out_appender" />
+            <appender-ref ref="console_err_appender" />
             <appender-ref ref="trace_appender" />
             <appender-ref ref="debug_appender" />
             <appender-ref ref="info_appender" />
