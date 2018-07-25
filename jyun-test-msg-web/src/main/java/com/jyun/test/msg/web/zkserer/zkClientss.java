@@ -1,8 +1,8 @@
 package com.jyun.test.msg.web.zkserer;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.alibaba.fastjson.JSON;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.ZooKeeper;
@@ -11,7 +11,12 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.Ordered;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class zkClientss implements ApplicationRunner, Ordered {
+
+	private final Logger logger = LogManager.getLogger(this.getClass());
 
 	@Value("${zookeeper.server}")
 	private static final String connectString = "10.182.96.168:2181";
@@ -43,13 +48,13 @@ public class zkClientss implements ApplicationRunner, Ordered {
 		//获取子节点信息，并对父节点进行监听
 		List<String> children = zk.getChildren(parent, true); //使用true 就是使用上面的监听器
 		for (String child : children) {
-			System.out.println(child);
+			logger.info(child);
 			byte[] data = zk.getData(parent + "/" + child, false, null);
 			//c把获取的数据给成员变量，以方便给各个客户端的业务使用
 			servers.add(new String(data));
 		}
 		serverList = servers;
-		System.out.println(serverList);
+		logger.info(JSON.toJSONString(serverList));
 	}
 
 	/**
@@ -58,7 +63,7 @@ public class zkClientss implements ApplicationRunner, Ordered {
 	 * @throws Exception
 	 */
 	public void clientwork() throws Exception {
-		System.out.println("client starts working .....");
+		logger.info("client starts working .....");
 		Thread.sleep(Long.MAX_VALUE);
 
 	}

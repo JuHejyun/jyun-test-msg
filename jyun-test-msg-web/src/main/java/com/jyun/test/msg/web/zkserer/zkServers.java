@@ -1,10 +1,8 @@
 package com.jyun.test.msg.web.zkserer;
- 
-import java.io.IOException;
-import java.net.InetAddress;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.zookeeper.CreateMode;
-import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.ZooDefs.Ids;
@@ -15,7 +13,11 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.Ordered;
 
+import java.net.InetAddress;
+
 public class zkServers implements ApplicationRunner, Ordered {
+
+	private final static Logger logger = LogManager.getLogger(zkServers.class);
 
 	@Value("${zookeeper.server}")
 	private static final String connectString = "10.182.96.168:2181";
@@ -28,8 +30,8 @@ public class zkServers implements ApplicationRunner, Ordered {
 		Stat exists = zk.exists(parent, false);
 		//如果不存在则创建
 		if(exists == null){
-			zk.create(parent, "IIIII".getBytes(), Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);	
-			System.out.println(" not exit ,then create----");
+			zk.create(parent, "IIIII".getBytes(), Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+			logger.info(" not exit ,then create----");
 		}		
 	}
 	
@@ -38,7 +40,7 @@ public class zkServers implements ApplicationRunner, Ordered {
 			@Override
 			public void process(WatchedEvent event) {
 				// TODO Auto-generated method stub
-				System.out.println(event + "++++++" + event.getPath());
+				logger.info(event + "++++++" + event.getPath());
 				try {
 					zk.getChildren(parent, true);
 				} catch (Exception e) {				
@@ -50,11 +52,11 @@ public class zkServers implements ApplicationRunner, Ordered {
 	public static void registserver(String args) throws Exception{
 		//在父目录下创建一个临时的序列化子节点
 		String createsever = zk.create(parent+"/server", args.getBytes(), Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL_SEQUENTIAL);
-		System.out.println(args + " is online " + createsever );
+		logger.info(args + " is online " + createsever );
 	}
 	
 	public static void serverwork(String args) throws Exception {
-		System.out.println(args + " start working .....");
+		logger.info(args + " start working .....");
 		Thread.sleep(Long.MAX_VALUE);
 		
 	}
