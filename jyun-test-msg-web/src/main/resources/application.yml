@@ -5,6 +5,8 @@ server:
 
 
 zookeeper:
-    server: 192.168.104.242:2181,192.168.104.244:2181,192.168.104.246:2181
+    server: 10.182.96.168:2181
+    parent: /zhuhj-msg-servers
+    sessionTimeout: 2000
 
 
