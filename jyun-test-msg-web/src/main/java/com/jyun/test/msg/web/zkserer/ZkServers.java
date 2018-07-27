@@ -1,6 +1,7 @@
 package com.jyun.test.msg.web.zkserer;
 
 import com.jyun.test.msg.web.config.ZkServerConfig;
+import com.jyun.test.msg.web.nsq.NsqProducer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.zookeeper.CreateMode;
@@ -50,6 +51,9 @@ public class ZkServers implements ApplicationRunner {
 				logger.info(event + "++++++" + event.getPath());
 				try {
 					zk.getChildren(zkServerConfig.getParent(), true);
+
+					NsqProducer.producer.produce("TestTopic", ("this is a message").getBytes());
+
 				} catch (Exception e) {				
 				}
 			}
@@ -82,6 +86,11 @@ public class ZkServers implements ApplicationRunner {
 		registserver(zkServerConfig,addr);
 		//执行这个服务器的相关业务
 		serverwork(addr);
+
+		NsqProducer nsqProducer = new NsqProducer();
+		nsqProducer.start();
+
+
 	}
 
 }

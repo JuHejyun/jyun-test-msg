@@ -14,7 +14,7 @@ public class NsqProducer {
 
 	private final Logger logger = LogManager.getLogger(this.getClass());
 
-	static NSQProducer producer;
+	public static NSQProducer producer;
 
 	public void start(){
 		producer = new NSQProducer().addAddress("localhost", 4161).start();

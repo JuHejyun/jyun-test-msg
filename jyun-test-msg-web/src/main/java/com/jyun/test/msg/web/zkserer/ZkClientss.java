@@ -2,6 +2,7 @@ package com.jyun.test.msg.web.zkserer;
 
 import com.alibaba.fastjson.JSON;
 import com.jyun.test.msg.web.config.ZkServerConfig;
+import com.jyun.test.msg.web.nsq.NsqConsumer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.zookeeper.WatchedEvent;
@@ -28,6 +29,7 @@ public class ZkClientss implements ApplicationRunner {
 
 	static ZooKeeper zk = null;
 	private static volatile List<String> serverList;
+	NsqConsumer nsqConsumer;
 
 	@Autowired
 	private ZkServerConfig zkServerConfig;
@@ -61,6 +63,7 @@ public class ZkClientss implements ApplicationRunner {
 			servers.add(new String(data));
 		}
 		serverList = servers;
+		nsqConsumer.listener(serverList);
 		logger.info(JSON.toJSONString(serverList));
 	}
 
@@ -85,6 +88,8 @@ public class ZkClientss implements ApplicationRunner {
 		zc.getznode(zkServerConfig);
 		//业务线程使用
 		zc.clientwork();
+
+		nsqConsumer = new NsqConsumer();
 	}
 
 }

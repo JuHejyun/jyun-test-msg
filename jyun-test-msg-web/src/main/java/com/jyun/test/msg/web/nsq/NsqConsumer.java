@@ -3,16 +3,16 @@ package com.jyun.test.msg.web.nsq;
 import com.github.brainlag.nsq.NSQConsumer;
 import com.github.brainlag.nsq.lookup.DefaultNSQLookup;
 import com.github.brainlag.nsq.lookup.NSQLookup;
-import com.jyun.test.msg.web.config.ExecutorConfig;
-import org.apache.catalina.Executor;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 
 /**
@@ -24,32 +24,34 @@ public class NsqConsumer {
 
 	private final Logger logger = LogManager.getLogger(this.getClass());
 
-	@Autowired
-	ExecutorConfig executorConfig;
-	static Map<String,NSQConsumer> consumerMap;
+	public static Map<String,NSQConsumer> consumerMap;
 
 
 	public void listener(List<String> serverList){
 
 		for (String ip : serverList) {
-			NSQLookup lookup = new DefaultNSQLookup();
-			lookup.addLookupAddress(ip, 4161);
-			NSQConsumer consumer = new NSQConsumer(lookup, "TestTopic", "dustin", (message) -> {
-				System.out.println("received: " + message);
-				//now mark the message as finished.
-				message.finished();
 
-				//or you could requeue it, which indicates a failure and puts it back on the queue.
-				//message.requeue();
-			});
+			NSQConsumer nsqConsumer = consumerMap.get(ip);
+			if(null == nsqConsumer){
+				NSQLookup lookup = new DefaultNSQLookup();
+				lookup.addLookupAddress(ip, 4161);
+				NSQConsumer consumer = new NSQConsumer(lookup, "TestTopic", "dustin", (message) -> {
+					logger.info("received: " + message);
+					//now mark the message as finished.
+					message.finished();
 
-			consumer.start();
+					//or you could requeue it, which indicates a failure and puts it back on the queue.
+					//message.requeue();
+				});
 
-			//线程睡眠，让程序执行完
-			try {
-				Thread.sleep(4000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+				consumer.start();
+
+				ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(1,
+						new BasicThreadFactory.Builder().namingPattern("example-schedule-pool-%d").daemon(true).build());
+
+				consumer.setExecutor(executorService);
+
+				consumerMap.put(ip,consumer);
 			}
 
 		}
